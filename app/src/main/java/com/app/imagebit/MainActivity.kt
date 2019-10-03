@@ -15,12 +15,16 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import android.os.Build
 import android.content.Context
+import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.net.Uri
 import android.os.Environment
 import android.os.Environment.DIRECTORY_PICTURES
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
+import com.app.imagebit.DatabaseHelper.Companion.COL_ID
+import com.app.imagebit.DatabaseHelper.Companion.IMAGE_BITMAP
+import kotlinx.android.synthetic.main.activity_main.*
 import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -33,27 +37,36 @@ class MainActivity : AppCompatActivity() {
     internal var photoFile: File? = null
     private var db: SQLiteDatabase? = null
     private var dbHelper: DatabaseHelper? = null
+    private var arrayList_image: ArrayList<ImageHelper>? = null
 
     internal lateinit var mCurrentPhotoPath: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        dbHelper = DatabaseHelper(this)
 
         imageView = findViewById(R.id.imageView)
         button = findViewById(R.id.btnCaptureImage)
 
         button.setOnClickListener {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    captureImage()
-                } else {
-                    captureImage2()
-                }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                captureImage()
+            } else {
+                captureImage2()
             }
+        }
+
+        btnSaveDB.setOnClickListener {
+            createImageFile()
+        }
+
+        btnShowImage.setOnClickListener {
+            readDb()
+        }
     }
 
     private fun captureImage2() {
-
         try {
             val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
             photoFile = createImageFile4()
@@ -67,11 +80,9 @@ class MainActivity : AppCompatActivity() {
         } catch (e: Exception) {
             displayMessage(baseContext, "Camera is not available.$e")
         }
-
     }
 
     private fun captureImage() {
-
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE), 0)
         } else {
@@ -95,7 +106,6 @@ class MainActivity : AppCompatActivity() {
                     displayMessage(baseContext, ex.message.toString())
                     Log.e("Messs-- ","---" +ex.message.toString())
                 }
-
             } else {
                 displayMessage(baseContext, "Nulll")
             }
@@ -103,7 +113,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-
         //Bundle extras = data.getExtras()
         //Bitmap imageBitmap = (Bitmap) extras.get("data")
         //imageView.setImageBitmap(imageBitmap)
@@ -133,7 +142,6 @@ class MainActivity : AppCompatActivity() {
 
         return File(mediaStorageDir.getPath() + File.separator
                 + "IMG_" + timeStamp + ".jpg")
-
     }
 
     @Throws(IOException::class)
@@ -148,23 +156,45 @@ class MainActivity : AppCompatActivity() {
 
         mCurrentPhotoPath = image.getAbsolutePath()
 
-         saveImageInDB(mCurrentPhotoPath)
+        saveImageInDB(mCurrentPhotoPath)
         Log.e("current path---", "---$mCurrentPhotoPath")
         return image
     }
 
-    fun saveImageInDB(selectedImageUri: String): Boolean {
+    private fun saveImageInDB(selectedImageUri: String): Boolean {
         try {
             db = dbHelper!!.writableDatabase
-         /*   val iStream = contentResolver.openInputStream(selectedImageUri)
-            val inputData = iStream*/
             dbHelper!!.insertImage(selectedImageUri)
             dbHelper!!.close()
             return true
         } catch (ioe: IOException) {
-            Log.e("TAG--", "<saveImageInDB> Error : " + ioe.localizedMessage)
+            Log.e("TAG--", "Error is: " + ioe.message.toString())
             dbHelper!!.close()
             return false
+        }
+    }
+
+    fun readDb() {
+        arrayList_image!!.clear()
+        dbHelper = DatabaseHelper(this)
+        db = dbHelper!!.writableDatabase
+
+        val cursor: Cursor = dbHelper!!.readNumber(db!!)
+        if(cursor.count > 0) {
+            while (cursor.moveToNext()) {
+                val id: Int
+                val image: String
+
+                id = cursor.getInt(cursor.getColumnIndex(COL_ID))
+                image = cursor.getString(cursor.getColumnIndex(IMAGE_BITMAP))
+
+                arrayList_image!!.add(ImageHelper(id, image))
+                for (i in arrayList_image!!.indices) {
+                    iv_show.setImageResource(arrayList_image!![i].imageByteArray!!.toInt())
+                }
+            }
+            cursor.close()
+            dbHelper!!.close()
         }
     }
 

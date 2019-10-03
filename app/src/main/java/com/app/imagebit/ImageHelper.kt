@@ -1,7 +1,7 @@
 package com.app.imagebit
 
-class ImageHelper {
+class ImageHelper(id: Int, image: String) {
 
-    var imageId: String? = null
-    var imageByteArray: ByteArray? = null
+    var imageId: Int? = null
+    var imageByteArray: String? = null
 }

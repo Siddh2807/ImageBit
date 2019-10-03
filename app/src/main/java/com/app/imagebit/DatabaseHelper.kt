@@ -2,6 +2,7 @@ package com.app.imagebit
 
 import android.content.ContentValues
 import android.content.Context
+import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.graphics.Bitmap
@@ -10,15 +11,12 @@ import android.graphics.drawable.Drawable
 
 import java.io.ByteArrayOutputStream
 
-class DatabaseHelper(private val context: Context) : SQLiteOpenHelper(context, databaseName, null, databaseVersion) {
-    private val TAG = "DatabaseHelperClass"
+class DatabaseHelper(private val context: Context) : SQLiteOpenHelper(context, databaseName, null, 1) {
     private var db: SQLiteDatabase? = null
 
     override fun onCreate(sqLiteDatabase: SQLiteDatabase) {
-        val CREATE_IMAGE_TABLE = ("CREATE TABLE " + TABLE_IMAGE + "("
-                + COL_ID + " INTEGER PRIMARY KEY ,"
-                + IMAGE_ID + " TEXT,"
-                + IMAGE_BITMAP + " BLOB )")
+        val CREATE_IMAGE_TABLE = "CREATE TABLE " + TABLE_IMAGE + "("+ COL_ID +
+                " INTEGER PRIMARY KEY AUTOINCREMENT, " + IMAGE_BITMAP + " BLOB )"
         sqLiteDatabase.execSQL(CREATE_IMAGE_TABLE)
     }
 
@@ -28,21 +26,19 @@ class DatabaseHelper(private val context: Context) : SQLiteOpenHelper(context, d
         onCreate(sqLiteDatabase)
     }
 
-    fun insetImage(dbDrawable: Drawable, imageId: String) {
+   fun insertImage(selectedImageUri: String): Long {
         db = this.writableDatabase
         val values = ContentValues()
-        values.put(IMAGE_ID, imageId)
-        val bitmap = (dbDrawable as BitmapDrawable).bitmap
-        val stream = ByteArrayOutputStream()
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
-        values.put(IMAGE_BITMAP, stream.toByteArray())
-        db!!.insert(TABLE_IMAGE, null, values)
+        values.put(IMAGE_BITMAP, selectedImageUri)
+        val success = db!!.insert(TABLE_IMAGE, null, values)
         db!!.close()
+        return success
     }
 
-    fun insertImage(selectedImageUri: String) {
-
-
+    fun readNumber(database: SQLiteDatabase): Cursor {
+        val projection: Array<String>
+        projection = arrayOf(COL_ID, IMAGE_BITMAP)
+        return database.query(TABLE_IMAGE, projection, null, null, null, null, null)
     }
 
     fun getNames(): List<String> {
@@ -71,31 +67,26 @@ class DatabaseHelper(private val context: Context) : SQLiteOpenHelper(context, d
 
     /* fun getImage(imageId: String): ImageHelper {
          val db = this.writableDatabase
-
          val cursor2 = db.query(TABLE_IMAGE,
                  arrayOf(COL_ID, IMAGE_ID, IMAGE_BITMAP), IMAGE_ID
                  + " LIKE '" + imageId + "%'", null, null, null, null)
          val imageHelper = ImageHelper()
-
          if (cursor2.moveToFirst()) {
              do {
                  imageHelper.imageId = cursor2.getString(1)
                  imageHelper.imageByteArray = cursor2.getBlob(2)
              } while (cursor2.moveToNext())
          }
-
          cursor2.close()
          db.close()
          return imageHelper
      }*/
 
     companion object {
-        private val databaseVersion = 1
         private val databaseName = "dbImage"
         private val TABLE_IMAGE = "ImageTable"
 
-        private val COL_ID = "col_id"
-        private val IMAGE_ID = "image_id"
-        private val IMAGE_BITMAP = "image_bitmap"
+        val COL_ID = "col_id"
+        val IMAGE_BITMAP = "image_bitmap"
     }
 }
