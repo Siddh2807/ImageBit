@@ -37,7 +37,7 @@ class MainActivity : AppCompatActivity() {
     internal var photoFile: File? = null
     private var db: SQLiteDatabase? = null
     private var dbHelper: DatabaseHelper? = null
-    private var arrayList_image: ArrayList<ImageHelper>? = null
+    private var arrayList_image: String? = null
 
     internal lateinit var mCurrentPhotoPath: String
 
@@ -175,7 +175,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun readDb() {
-        arrayList_image!!.clear()
         dbHelper = DatabaseHelper(this)
         db = dbHelper!!.writableDatabase
 
@@ -188,10 +187,10 @@ class MainActivity : AppCompatActivity() {
                 id = cursor.getInt(cursor.getColumnIndex(COL_ID))
                 image = cursor.getString(cursor.getColumnIndex(IMAGE_BITMAP))
 
-                arrayList_image!!.add(ImageHelper(id, image))
-                for (i in arrayList_image!!.indices) {
-                    iv_show.setImageResource(arrayList_image!![i].imageByteArray!!.toInt())
-                }
+                //arrayList_image!!.add(ImageHelper(id, image))
+
+                    iv_show.setImageResource(image.toInt())
+
             }
             cursor.close()
             dbHelper!!.close()

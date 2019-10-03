@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "429221918049",
+    "firebase_url": "https://imagebit.firebaseio.com",
+    "project_id": "imagebit",
+    "storage_bucket": "imagebit.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:429221918049:android:cb34d9b5588f7cd40ec120",
+        "android_client_info": {
+          "package_name": "com.app.imagebit"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "429221918049-3lqhh477oslbld6itndqj1977j7606k1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.app.imagebit",
+            "certificate_hash": "a8c4a05b538d9b29051f92411f7607cd6035f6e0"
+          }
+        },
+        {
+          "client_id": "429221918049-flkbvv6lb59295ok3cksh4thetpq71fk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAxK1St4TgpqEOVtoDchFlaF-zODj5Ko1I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "429221918049-flkbvv6lb59295ok3cksh4thetpq71fk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
